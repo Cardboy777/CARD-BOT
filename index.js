@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Discord = require('discord.js')
-const {prefix, token} = require('./config.json')
+const {prefix, token, voteMsgsWatchList} = require('./config.json')
 
 const bot = new Discord.Client({presence: {status: "Type '?commands' to view list of available commands"}})
 bot.commands = new Discord.Collection();
@@ -72,7 +72,16 @@ bot.on('message', (message) => {
 })
 
 bot.on('messageReactionAdd', (reaction, user) => {
+	console.log('recieved reaction')
+	if(reaction.emoji !== '👍'){
+		return
+	}
+	console.log('Calculating vote')
 
+	let votes = voteMsgsWatchList.filter( el => (new Date().getTime() - new Date(el.date).getTime()) < 259200000 )
+	let vote = votes.find( el => el === reaction.message.id)
+	
+	
 })
 
 bot.login(token)

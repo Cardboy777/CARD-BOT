@@ -1,4 +1,4 @@
-const config = require('../config.json');
+const config = require('../test.json');
 const fs = require('fs');
 
 const cmd_name = 'vote'
@@ -21,7 +21,6 @@ module.exports = {
             message.channel.send(`Error: Invalid title.`)
             return
         }
-        console.log(options)
         if(options.length < 2){
             message.channel.send(`Error: Not enough options for voting.`)
             return
@@ -29,17 +28,15 @@ module.exports = {
 
         let msgIdsToWatch = []
 
-        message.channel.send(`**${title}**`)
-        options.map(async (el, i) => {
-            await message.channel.send(`**${i+1}:** ${el}`).then( msg => {
-                msgIdsToWatch.push(msg.id)
-                msg.react('U+1F44D')
-            })
-        })
-        await message.channel.send('**Results: _Deliberating_**').then( msg => {
+        await message.channel.send(`**${title}**`)
+        await Promise.all(options.map(async (el, i) => {
+            let msg = await message.channel.send(`**${i+1}:** ${el}`)
             msgIdsToWatch.push(msg.id)
-            msg.react('1F44D')
-        })
+            await msg.react('👍')
+            return msg
+        }))
+
+        msgIdsToWatch.push( (await message.channel.send('**Results: _Deliberating_**')).id )
 
         newList = config.voteMsgsWatchList.concat({
             ids: msgIdsToWatch,
@@ -47,8 +44,8 @@ module.exports = {
             title
         })
 
-        fs.writeFileSync('config.json', JSON.stringify(Object.assign(config, {
-            voteMsgsWatchList: newList.filter( el => (new Date().getTime() - el.date.getTime()) < 259200000 ) /*3 days in ms*/
+        fs.writeFileSync('test.json', JSON.stringify(Object.assign(config, {
+            voteMsgsWatchList: newList.filter( el => (new Date().getTime() - new Date(el.date).getTime()) < 259200000 ) /*259200000 ~ 3 days in ms*/
         })))
 	},
 };
