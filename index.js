@@ -71,17 +71,4 @@ bot.on('message', (message) => {
 	}
 })
 
-bot.on('messageReactionAdd', (reaction, user) => {
-	console.log('recieved reaction')
-	if(reaction.emoji !== '👍'){
-		return
-	}
-	console.log('Calculating vote')
-
-	let votes = voteMsgsWatchList.filter( el => (new Date().getTime() - new Date(el.date).getTime()) < 259200000 )
-	let vote = votes.find( el => el === reaction.message.id)
-	
-	
-})
-
 bot.login(token)
